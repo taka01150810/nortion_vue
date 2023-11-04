@@ -20,7 +20,8 @@
       <div class="button-icon">
         <i class="fas fa-edit"></i>
       </div>
-      <div class="button-icon">
+      <!-- ボタン押下時にイベントを発火。引数としてnoteを渡す。-->
+      <div class="button-icon" @click="onClickDelete(note)">
         <i class="fas fa-trash"></i>
       </div>
     </div>
@@ -37,6 +38,14 @@ export default {
     },
     onMouseLeave: function () {
       this.note.mouseover = false;
+    },
+    /*
+    削除ボタンが押されたことを、呼び出し元のメインページ側に伝える必要がある。
+    呼び出し元ではタグ内で@deleteというディレクティブでイベントを受け取り、
+    そこから任意の処理へとつなげていくことができる。
+    */
+    onClickDelete: function (note) {
+      this.$emit("delete", note);
     },
   },
 };

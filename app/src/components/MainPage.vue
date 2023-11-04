@@ -3,10 +3,12 @@
     <div class="left-menu">
       <!-- ノートリスト -->
       <!-- v-bind = コンポーネントに値を受け渡しを行うディレクティブ -->
+      <!-- @deleteイベントが発覚したタイミングでonDeleteNoteメソッドを呼び出す -->
       <NoteItem
         v-for="note in noteList"
         v-bind:note="note"
         v-bind:key="note.id"
+        @delete="onDeleteNote"
       />
 
       <!-- ノート追加ボタン -->
@@ -40,6 +42,11 @@ export default {
         name: `新規ノート`,
         mouseover: false,
       });
+    },
+    // 引数 deleteNoteはemitの第二引数の変数が入ってくる
+    onDeleteNote: function (deleteNote) {
+      const index = this.noteList.indexOf(deleteNote);
+      this.noteList.splice(index, 1);
     },
   },
   components: {
