@@ -3,28 +3,44 @@
     class="note"
     @mouseover="onMouseOver"
     @mouseleave="onMouseLeave"
-    v-bind:class="{ mouseover: note.mouseover }"
+    v-bind:class="{ mouseover: note.mouseover && !note.editing }"
   >
-    <div class="note-icon">
-      <i class="fas fa-file-alt"></i>
-    </div>
-    <div class="note-name">{{ note.name }}</div>
+    <!-- 
+        <template>タグは「vueコード上は存在するが、描画時には消えてしまう」という特徴を持った要素
+        <template>タグの中で条件付けをすることで、無駄な要素を増やすことなく表示の切り替えを実現することができる
+    -->
+    <!-- 
+        @keypressは キー入力イベント 
+    -->
+    <template v-if="note.editing">
+      <input
+        v-model="note.name"
+        class="transparent"
+        @keypress.enter="onEditEnd"
+      />
+    </template>
+    <template v-else>
+      <div class="note-icon">
+        <i class="fas fa-file-alt"></i>
+      </div>
+      <div class="note-name">{{ note.name }}</div>
 
-    <div v-show="note.mouseover" class="buttons">
-      <div class="button-icon">
-        <i class="fas fa-sitemap"></i>
+      <div v-show="note.mouseover" class="buttons">
+        <div class="button-icon" @click="onClickEdit(note)">
+          <i class="fas fa-sitemap"></i>
+        </div>
+        <div class="button-icon">
+          <i class="fas fa-plus-circle"></i>
+        </div>
+        <div class="button-icon">
+          <i class="fas fa-edit"></i>
+        </div>
+        <!-- ボタン押下時にイベントを発火。引数としてnoteを渡す。-->
+        <div class="button-icon" @click="onClickDelete(note)">
+          <i class="fas fa-trash"></i>
+        </div>
       </div>
-      <div class="button-icon">
-        <i class="fas fa-plus-circle"></i>
-      </div>
-      <div class="button-icon">
-        <i class="fas fa-edit"></i>
-      </div>
-      <!-- ボタン押下時にイベントを発火。引数としてnoteを渡す。-->
-      <div class="button-icon" @click="onClickDelete(note)">
-        <i class="fas fa-trash"></i>
-      </div>
-    </div>
+    </template>
   </div>
 </template>
 
@@ -46,6 +62,12 @@ export default {
     */
     onClickDelete: function (note) {
       this.$emit("delete", note);
+    },
+    onClickEdit: function (note) {
+      this.$emit("editStart", note);
+    },
+    onEditEnd: function () {
+      this.$emit("editEnd");
     },
   },
 };

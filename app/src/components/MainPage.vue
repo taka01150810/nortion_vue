@@ -1,6 +1,6 @@
 <template>
   <div class="main-page">
-    <div class="left-menu">
+    <div class="left-menu" @click.self="onEditNoteEnd()">
       <!-- ノートリスト -->
       <!-- v-bind = コンポーネントに値を受け渡しを行うディレクティブ -->
       <!-- @deleteイベントが発覚したタイミングでonDeleteNoteメソッドを呼び出す -->
@@ -9,6 +9,8 @@
         v-bind:note="note"
         v-bind:key="note.id"
         @delete="onDeleteNote"
+        @editStart="onEditNoteStart"
+        @editEnd="onEditNoteEnd"
       />
 
       <!-- ノート追加ボタン -->
@@ -16,7 +18,13 @@
         <i class="fas fa-plus-square"></i>ノートを追加
       </button>
     </div>
-    <div class="right-view">右ビュー</div>
+    <!-- 
+      @click="onEditNoteEnd()"とすると、編集ボタンをクリックしたイベントが親である左ビューまで伝わることで
+      onEditNoteEndが即座に呼ばれてしまい、編集状態がすぐに終了してしまうというバグが発生する。
+      .selfという箇所を追加することで、「子から伝わったイベントではなく、左ビュー自体がクリックされた場合のみ動作する」
+      という仕組みが実現可能。
+    -->
+    <div class="right-view" @click.self="onEditNoteEnd()">右ビュー</div>
   </div>
 </template>
 
@@ -41,12 +49,24 @@ export default {
         id: new Date().getTime().toString(16),
         name: `新規ノート`,
         mouseover: false,
+        // 編集中かどうかを管理する
+        editing: false,
       });
     },
     // 引数 deleteNoteはemitの第二引数の変数が入ってくる
     onDeleteNote: function (deleteNote) {
       const index = this.noteList.indexOf(deleteNote);
       this.noteList.splice(index, 1);
+    },
+    onEditNoteStart: function (editNote) {
+      for (let note of this.noteList) {
+        note.editing = note.id === editNote.id;
+      }
+    },
+    onEditNoteEnd: function () {
+      for (let note of this.noteList) {
+        note.editing = false;
+      }
     },
   },
   components: {
