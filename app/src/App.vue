@@ -6,16 +6,16 @@
 </template>
 
 <script>
-import NavigationBar from '@/components/NavigationBar.vue'
-import MainPage from '@/components/MainPage.vue'
+import NavigationBar from "@/components/NavigationBar.vue";
+import MainPage from "@/components/MainPage.vue";
 
 export default {
-  name: 'App',
+  name: "App",
   components: {
     NavigationBar,
-    MainPage
-  }
-}
+    MainPage,
+  },
+};
 </script>
 
 <style>
