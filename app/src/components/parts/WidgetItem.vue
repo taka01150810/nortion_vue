@@ -7,7 +7,30 @@
       v-bind:class="{ mouseover: widget.mouseover }"
     >
       <!-- テキスト入力欄 -->
-      ・<input v-model="widget.text" class="transparent" placeholder="本文" />
+      <template v-if="widget.type == 'heading'">
+        <input
+          v-model="widget.text"
+          class="heading transparent"
+          placeholder="見出し"
+        />
+      </template>
+      <template v-if="widget.type == 'body'">
+        ・<input
+          v-model="widget.text"
+          class="body transparent"
+          placeholder="本文"
+        />
+      </template>
+      <template v-if="widget.type == 'code'">
+        <textarea
+          v-model="widget.text"
+          class="code"
+          rows="1"
+          placeholder="コード"
+          v-bind:ref="'widget-code-' + widget.id"
+        >
+        </textarea>
+      </template>
 
       <!-- ボタン群 -->
       <div v-show="widget.mouseover" class="buttons">
@@ -28,7 +51,14 @@
           <i class="fas fa-trash"></i>
         </div>
         <div class="button-icon">
-          <i class="fas fa-cog"></i>
+          <i class="fas fa-cog" data-toggle="dropdown"></i>
+          <div class="dropdown-menu">
+            <a class="dropdown-item" @click="widget.type = 'heading'">見出し</a>
+            <a class="dropdown-item" @click="widget.type = 'body'">本文</a>
+            <a class="dropdown-item" @click="widget.type = 'code'"
+              >ソースコード</a
+            >
+          </div>
         </div>
       </div>
     </div>
@@ -68,6 +98,33 @@ export default {
     onClickAddWidgetAfter: function (parentWidget, widget) {
       this.$emit("addWidgetAfter", parentWidget, widget);
     },
+    // ソースコードタイプの高さを設定
+    resizeCodeTextarea: function () {
+      if (this.widget.type !== "code") return;
+      const textarea = this.$refs[`widget-code-${this.widget.id}`];
+      const promise = new Promise(function (resolve) {
+        resolve((textarea.style.height = "auto"));
+      });
+      promise.then(function () {
+        // スクロールバー全体の長さをtextareaの高さとして設定
+        textarea.style.height = textarea.scrollHeight + "px";
+      });
+    },
+  },
+  /*
+  watchオプション
+  watchオプションは指定した変数の変化を検知して、任意の処理を行う仕組みとなります。
+  
+  今回は使用していませんが、変更前の値と変更後の値をそれぞれ引数として受け取ることもでき、
+  それらの値を条件として処理を分岐することも可能となります。
+  
+  値の変化に応じて単純な計算結果を返すような場合はcomputedが用いられますが、
+  今回のように計算結果を返すだけではなく複雑な処理が必要な場面ではwatchが必要となります。
+  */
+  watch: {
+    "widget.text": function () {
+      this.resizeCodeTextarea();
+    },
   },
 };
 </script>
@@ -89,6 +146,31 @@ export default {
       margin-left: 3px;
       border-radius: 5px;
     }
+  }
+  input.heading {
+    font-size: 20px;
+    font-weight: bold;
+    border-bottom: 1.5px solid #e0e0e0;
+  }
+  input.body {
+    font-size: 16px;
+  }
+  .code {
+    width: calc(100% - 120px);
+    height: 35px;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 8px;
+    color: #f8f8f2;
+    background: #282a36;
+    font-size: 14px;
+    font-family: Consolas, Menlo, "Liberation Mono", Courier, monospace;
+    resize: none;
+  }
+  .code:focus {
+    outline: none;
+    -webkit-box-shadow: none;
+    box-shadow: none;
   }
 }
 .child-widget {
