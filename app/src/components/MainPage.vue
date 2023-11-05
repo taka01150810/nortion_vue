@@ -13,6 +13,7 @@
         @editStart="onEditNoteStart"
         @editEnd="onEditNoteEnd"
         @addChild="onAddChildNote"
+        @addNoteAfter="onAddNoteAfter"
       />
 
       <!-- ノート追加ボタン -->
@@ -46,15 +47,25 @@ export default {
     dataで定義した変数や、methodsで定義した関数をスクリプト側で使用したい場合、
     this.変数名、this.関数名()といったようにthis.を初めにつけることで呼び出すことができます。
     */
+    // ノート追加
     onClickButtonAdd: function () {
-      this.noteList.push({
+      this.onAddNoteCommon(this.noteList);
+    },
+    onAddNoteCommon: function (targetList, layer, index) {
+      layer = layer || 1;
+      const note = {
         id: new Date().getTime().toString(16),
-        name: `新規ノート`,
+        name: `新規ノート-${layer}-${targetList.length}`,
         mouseover: false,
-        // 編集中かどうかを管理する
         editing: false,
         children: [],
-      });
+        layer: layer,
+      };
+      if (index == null) {
+        targetList.push(note);
+      } else {
+        targetList.splice(index + 1, 0, note);
+      }
     },
     // 引数 deleteNoteはemitの第二引数の変数が入ってくる
     onDeleteNote: function (parentNote, note) {
@@ -80,14 +91,16 @@ export default {
         this.onEditNoteEnd(note);
       }
     },
+    // 子ノート追加
     onAddChildNote: function (note) {
-      note.children.push({
-        id: new Date().getTime().toString(16),
-        name: note.name + "の子",
-        mouseover: false,
-        editing: false,
-        children: [],
-      });
+      this.onAddNoteCommon(note.children, note.layer + 1);
+    },
+    onAddNoteAfter: function (parentNote, note) {
+      const targetList =
+        parentNote == null ? this.noteList : parentNote.children;
+      const layer = parentNote == null ? 1 : note.layer;
+      const index = targetList.indexOf(note);
+      this.onAddNoteCommon(targetList, layer, index);
     },
   },
   components: {
