@@ -11,6 +11,7 @@
         @delete="onDeleteNote"
         @editStart="onEditNoteStart"
         @editEnd="onEditNoteEnd"
+        @addChild="onAddChildNote"
       />
 
       <!-- ノート追加ボタン -->
@@ -51,6 +52,7 @@ export default {
         mouseover: false,
         // 編集中かどうかを管理する
         editing: false,
+        children: [],
       });
     },
     // 引数 deleteNoteはemitの第二引数の変数が入ってくる
@@ -67,6 +69,15 @@ export default {
       for (let note of this.noteList) {
         note.editing = false;
       }
+    },
+    onAddChildNote: function (note) {
+      note.children.push({
+        id: new Date().getTime().toString(16),
+        name: note.name + "の子",
+        mouseover: false,
+        editing: false,
+        children: [],
+      });
     },
   },
   components: {
