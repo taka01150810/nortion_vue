@@ -37,7 +37,7 @@
             <i class="fas fa-edit"></i>
           </div>
           <!-- ボタン押下時にイベントを発火。引数としてnoteを渡す。-->
-          <div class="button-icon" @click="onClickDelete(note)">
+          <div class="button-icon" @click="onClickDelete(parentNote, note)">
             <i class="fas fa-trash"></i>
           </div>
         </div>
@@ -48,6 +48,7 @@
         v-for="childNote in note.children"
         v-bind:note="childNote"
         v-bind:key="childNote.id"
+        v-bind:parentNote="note"
         @delete="onClickDelete"
         @editStart="onClickEdit"
         @editEnd="onEditEnd"
@@ -60,7 +61,7 @@
 <script>
 export default {
   name: "NoteItem",
-  props: ["note"],
+  props: ["note", "parentNote"],
   methods: {
     onMouseOver: function () {
       this.note.mouseover = true;
@@ -73,8 +74,8 @@ export default {
     呼び出し元ではタグ内で@deleteというディレクティブでイベントを受け取り、
     そこから任意の処理へとつなげていくことができる。
     */
-    onClickDelete: function (note) {
-      this.$emit("delete", note);
+    onClickDelete: function (parentNote, note) {
+      this.$emit("delete", parentNote, note);
     },
     onClickEdit: function (note) {
       this.$emit("editStart", note);
