@@ -11,6 +11,7 @@
           v-bind:key="note.id"
           v-bind:layer="1"
           @delete="onDeleteNote"
+          @select="onSelectNote"
           @editStart="onEditNoteStart"
           @editEnd="onEditNoteEnd"
           @addChild="onAddChildNote"
@@ -28,7 +29,19 @@
       .selfという箇所を追加することで、「子から伝わったイベントではなく、左ビュー自体がクリックされた場合のみ動作する」
       という仕組みが実現可能。
     -->
-    <div class="right-view" @click.self="onEditNoteEnd()">右ビュー</div>
+    <div class="right-view" @click.self="onEditNoteEnd()">
+      <template v-if="selectedNote == null">
+        <div class="no-selected-note">ノートを選択してください</div>
+      </template>
+      <template v-else>
+        <div class="path">
+          <small>{{ selectedPath }}</small>
+        </div>
+        <div class="note-content">
+          <h3 class="note-title">{{ selectedNote.name }}</h3>
+        </div>
+      </template>
+    </div>
   </div>
 </template>
 
@@ -41,6 +54,7 @@ export default {
     return {
       // 1. 変数の定義
       noteList: [],
+      selectedNote: null,
     };
   },
   methods: {
@@ -60,6 +74,7 @@ export default {
         name: `新規ノート-${layer}-${targetList.length}`,
         mouseover: false,
         editing: false,
+        selected: false,
         children: [],
         layer: layer,
       };
@@ -75,6 +90,20 @@ export default {
         parentNote == null ? this.noteList : parentNote.children;
       const index = targetList.indexOf(note);
       targetList.splice(index, 1);
+    },
+    onSelectNote: function (targetNote) {
+      // 再帰的にノートの選択状態を更新
+      const updateSelectStatus = function (targetNote, noteList) {
+        for (let note of noteList) {
+          // 選択されたノートと一致すればselected = true。それ以外はselected = falseに更新
+          note.selected = note.id === targetNote.id;
+          updateSelectStatus(targetNote, note.children);
+        }
+      };
+      updateSelectStatus(targetNote, this.noteList);
+
+      // 選択中ノート情報を更新
+      this.selectedNote = targetNote;
     },
     onEditNoteStart: function (editNote, parentNote) {
       const targetList =
@@ -105,6 +134,39 @@ export default {
       this.onAddNoteCommon(targetList, layer, index);
     },
   },
+  /* computedオプション
+  関数で計算した結果を返すということで、methodsオプションとよく類似して比較されるのですが以下のような違いがあります。
+  methods
+  1. 変数の更新／取得が可能
+  2. 呼び出しのたびに処理が行われる
+  3.引数を渡すことが可能
+  4. template内では関数名()の形で呼び出し
+  
+  computed
+  1. 変数の取得のみ可能（※ 別途対応で更新も可能）
+  2. 計算に利用している変数が更新されない限り、再計算は行われない
+  3. 引数を渡すことができない
+  4. template内では関数名の形で呼び出し
+
+  そのため、引数を必要とせず、特定のルールに則り値を返すような関数に関してはcomputedを使い、
+  それ以外はmethodsを使うような場合分けが良いかと思われます。
+  */
+  // ノートまでのパスの計算
+  computed: {
+    selectedPath: function () {
+      const searchSelectedPath = function (noteList, path) {
+        for (let note of noteList) {
+          const currentPath =
+            path == null ? note.name : `${path} / ${note.name}`;
+          if (note.selected) return currentPath;
+          const selectedPath = searchSelectedPath(note.children, currentPath);
+          if (selectedPath.length > 0) return selectedPath;
+        }
+        return "";
+      };
+      return searchSelectedPath(this.noteList);
+    },
+  },
   components: {
     NoteItem,
     draggable,
@@ -123,6 +185,23 @@ export default {
   .right-view {
     flex-grow: 1;
     padding: 10px;
+    .no-selected-note {
+      text-align: center;
+      font-size: 25px;
+      margin: 20px;
+    }
+    .path {
+      text-align: left;
+      margin-bottom: 50px;
+    }
+    .note-content {
+      max-width: 900px;
+      margin: 0 auto;
+      text-align: left;
+      .note-title {
+        margin-bottom: 25px;
+      }
+    }
   }
 }
 </style>

@@ -4,7 +4,11 @@
       class="note"
       @mouseover="onMouseOver"
       @mouseleave="onMouseLeave"
-      v-bind:class="{ mouseover: note.mouseover && !note.editing }"
+      @click="onSelect(note)"
+      v-bind:class="{
+        mouseover: note.mouseover && !note.editing,
+        selected: note.selected,
+      }"
     >
       <!-- 
         <template>タグは「vueコード上は存在するが、描画時には消えてしまう」という特徴を持った要素
@@ -60,6 +64,7 @@
           v-bind:parentNote="note"
           v-bind:layer="layer + 1"
           @delete="onClickDelete"
+          @select="onSelect"
           @editStart="onClickEdit"
           @editEnd="onEditEnd"
           @addChild="onClickChildNote"
@@ -82,6 +87,9 @@ export default {
     },
     onMouseLeave: function () {
       this.note.mouseover = false;
+    },
+    onSelect: function (note) {
+      this.$emit("select", note);
     },
     /*
     削除ボタンが押されたことを、呼び出し元のメインページ側に伝える必要がある。
@@ -120,6 +128,11 @@ export default {
   &.mouseover {
     background-color: rgb(232, 231, 228);
     cursor: pointer;
+  }
+  &.selected {
+    color: black;
+    background-color: rgb(232, 231, 228);
+    font-weight: 600;
   }
   .note-icon {
     margin-left: 10px;
