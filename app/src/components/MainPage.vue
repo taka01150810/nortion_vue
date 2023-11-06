@@ -156,7 +156,11 @@ export default {
       layer = layer || 1;
       const widget = {
         id: new Date().getTime().toString(16),
-        type: "heading",
+        /* 
+        メインページ側でウィジェットを追加する際に、
+        階層数が1の場合には見出しとして作成しそれ以外では本文として作成する
+        */
+        type: layer === 1 ? "heading" : "body",
         text: "",
         mouseover: false,
         children: [],

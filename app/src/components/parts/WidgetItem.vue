@@ -12,6 +12,7 @@
           v-model="widget.text"
           class="heading transparent"
           placeholder="見出し"
+          v-bind:ref="'widget-heading-' + widget.id"
         />
       </template>
       <template v-if="widget.type == 'body'">
@@ -19,6 +20,7 @@
           v-model="widget.text"
           class="body transparent"
           placeholder="本文"
+          v-bind:ref="'widget-body-' + widget.id"
         />
       </template>
       <template v-if="widget.type == 'code'">
@@ -86,6 +88,24 @@ import draggable from "vuedraggable";
 export default {
   name: "WidgetItem",
   props: ["widget", "parentWidget", "layer"],
+  /* ライフサイクルとライフサイクルフック
+  
+  Vue.jsを始めとするフレームワークには、表示されている要素が作成、更新、削除されるまでの一連の流れである、
+  「ライフサイクル」という概念があります。
+  
+  その流れの中で、特定のタイミングで予め決められた関数が呼び出されるような仕組みが用意されています。
+  これを「ライフサイクルフック」と呼びます。
+  例えばデータの初期化が完了したらcreated関数、データが更新されたらupdated関数が呼び出される、といった形です。
+  
+  今回使用しているmountedは、初期化後にHTML部分の準備ができたタイミングで呼び出されるものなので、
+  このタイミングで入力要素にフォーカスを当てるような処理を行うことで
+  作成された要素がすぐに入力できる状態を実現することができます。
+  */
+  mounted: function () {
+    const input = this.$refs[`widget-${this.widget.type}-${this.widget.id}`];
+    input.focus();
+  },
+
   methods: {
     onMouseOver: function () {
       this.widget.mouseover = true;
