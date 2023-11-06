@@ -39,15 +39,17 @@
         </div>
         <div class="note-content">
           <h3 class="note-title">{{ selectedNote.name }}</h3>
-          <WidgetItem
-            v-for="widget in selectedNote.widgetList"
-            v-bind:widget="widget"
-            v-bind:layer="1"
-            v-bind:key="widget.id"
-            @delete="onDeleteWidget"
-            @addChild="onAddChildWidget"
-            @addWidgetAfter="onAddWidgetAfter"
-          />
+          <draggable v-bind:list="selectedNote.widgetList" group="widgets">
+            <WidgetItem
+              v-for="widget in selectedNote.widgetList"
+              v-bind:widget="widget"
+              v-bind:layer="1"
+              v-bind:key="widget.id"
+              @delete="onDeleteWidget"
+              @addChild="onAddChildWidget"
+              @addWidgetAfter="onAddWidgetAfter"
+            />
+          </draggable>
           <button class="transparent" @click="onClickButtonAddWidget">
             <i class="fas fa-plus-square"></i>ウィジェットを追加
           </button>

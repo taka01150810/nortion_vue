@@ -64,21 +64,25 @@
     </div>
 
     <div class="child-widget">
-      <WidgetItem
-        v-for="childWidget in widget.children"
-        v-bind:widget="childWidget"
-        v-bind:parentWidget="widget"
-        v-bind:layer="layer + 1"
-        v-bind:key="childWidget.id"
-        @delete="onClickDelete"
-        @addChild="onClickChildWidget"
-        @addWidgetAfter="onClickAddWidgetAfter"
-      />
+      <draggable v-bind:list="widget.children" group="widgets">
+        <WidgetItem
+          v-for="childWidget in widget.children"
+          v-bind:widget="childWidget"
+          v-bind:parentWidget="widget"
+          v-bind:layer="layer + 1"
+          v-bind:key="childWidget.id"
+          @delete="onClickDelete"
+          @addChild="onClickChildWidget"
+          @addWidgetAfter="onClickAddWidgetAfter"
+        />
+      </draggable>
     </div>
   </div>
 </template>
 
 <script>
+import draggable from "vuedraggable";
+
 export default {
   name: "WidgetItem",
   props: ["widget", "parentWidget", "layer"],
@@ -125,6 +129,9 @@ export default {
     "widget.text": function () {
       this.resizeCodeTextarea();
     },
+  },
+  components: {
+    draggable,
   },
 };
 </script>
