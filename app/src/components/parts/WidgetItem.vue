@@ -13,6 +13,8 @@
           class="heading transparent"
           placeholder="見出し"
           v-bind:ref="'widget-heading-' + widget.id"
+          @keypress.enter="onClickAddWidgetAfter(parentWidget, widget)"
+          @keydown.tab="onKeydownTab"
         />
       </template>
       <template v-if="widget.type == 'body'">
@@ -21,6 +23,8 @@
           class="body transparent"
           placeholder="本文"
           v-bind:ref="'widget-body-' + widget.id"
+          @keypress.enter="onClickAddWidgetAfter(parentWidget, widget)"
+          @keydown.tab="onKeydownTab"
         />
       </template>
       <template v-if="widget.type == 'code'">
@@ -121,6 +125,12 @@ export default {
     },
     onClickAddWidgetAfter: function (parentWidget, widget) {
       this.$emit("addWidgetAfter", parentWidget, widget);
+    },
+    onKeydownTab: function (e) {
+      if (this.widget.layer < 3) {
+        this.$emit("addChild", this.widget);
+      }
+      e.preventDefault();
     },
     // ソースコードタイプの高さを設定
     resizeCodeTextarea: function () {
