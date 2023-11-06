@@ -194,6 +194,14 @@ export default {
           : parentWidget.children;
       const index = targetList.indexOf(widget);
       targetList.splice(index, 1);
+
+      // 削除した1つ前のウィジェットを選択状態にする
+      // 削除したウィジェットがリストの一番最初 → 親ウィジェットにフォーカスを当てる
+      const focusWidget = index === 0 ? parentWidget : targetList[index - 1];
+      // それ以外 → 削除対象の1つ前のウィジェットにフォーカスを当てる
+      if (focusWidget != null) {
+        focusWidget.id = (parseInt(focusWidget.id, 16) + 1).toString(16);
+      }
     },
   },
   /* computedオプション
@@ -203,7 +211,7 @@ export default {
   2. 呼び出しのたびに処理が行われる
   3.引数を渡すことが可能
   4. template内では関数名()の形で呼び出し
-  
+
   computed
   1. 変数の取得のみ可能（※ 別途対応で更新も可能）
   2. 計算に利用している変数が更新されない限り、再計算は行われない

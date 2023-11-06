@@ -15,6 +15,7 @@
           v-bind:ref="'widget-heading-' + widget.id"
           @keypress.enter="onClickAddWidgetAfter(parentWidget, widget)"
           @keydown.tab="onKeydownTab"
+          @keydown.delete="onKeydownDelete"
         />
       </template>
       <template v-if="widget.type == 'body'">
@@ -25,6 +26,7 @@
           v-bind:ref="'widget-body-' + widget.id"
           @keypress.enter="onClickAddWidgetAfter(parentWidget, widget)"
           @keydown.tab="onKeydownTab"
+          @keydown.delete="onKeydownDelete"
         />
       </template>
       <template v-if="widget.type == 'code'">
@@ -34,6 +36,7 @@
           rows="1"
           placeholder="コード"
           v-bind:ref="'widget-code-' + widget.id"
+          @keydown.delete="onKeydownDelete"
         >
         </textarea>
       </template>
@@ -131,6 +134,12 @@ export default {
         this.$emit("addChild", this.widget);
       }
       e.preventDefault();
+    },
+    onKeydownDelete: function (e) {
+      if (this.widget.text.length === 0) {
+        this.$emit("delete", this.parentWidget, this.widget);
+        e.preventDefault();
+      }
     },
     // ソースコードタイプの高さを設定
     resizeCodeTextarea: function () {
